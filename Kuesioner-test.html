@@ -74,12 +74,53 @@
         </div>
       </div>
 
+      <!-- Styling css tambahan button selanjutnya dan sebelumnya -->
+      <style>
+        #btnPrev,
+        #btnSkip {
+          background-color: #192a56;
+          color: #ffe7bb;
+          border: none; /* biar ga ada border outline default */
+          transition: all 0.3s ease;
+          /* buat animasi halus */
+        }
+        #btnPrev:hover,
+        #btnSkip:hover {
+          background-color: #066a4c;
+          color: #ffe7bb; /* biar teks tetap kontras */
+          transform: translateY(-3px); /* naik dikit */
+        }
+      </style>
+
       <!-- Reset Button -->
       <div id="resetContainer" class="d-flex justify-content-center pt-4">
-        <button type="button" id="btnReset" class="btn btn-outline-secondary">
+        <button
+          type="button"
+          id="btnReset"
+          class="btn btn-outline-secondary"
+          style="color: white; background-color: red"
+        >
           Reset Survey
         </button>
       </div>
+
+      <style>
+        /* Styling reset button tambahan */
+        #btnReset {
+          background: linear-gradient(45deg, #f2961a, #f9c700);
+          color: #ffe7bb;
+          border: none;
+          transition: all 0.3s ease;
+        }
+        #btnReset:hover {
+          background: #6a0606;
+          transform: translateY(-3px);
+          color: #ffe7bb;
+        }
+        #btnReset:active {
+          transform: translateY(0);
+        }
+      </style>
 
       <!-- Hasil Klasifikasi -->
       <section id="hasilKlasifikasi" class="mt-5" style="display: none">
@@ -190,34 +231,32 @@
                 : "";
 
             return `
-  <div class="form-check mb-3 d-flex align-items-center">
-    <input class="form-check-input me-3" type="radio" name="currentQuestion"
-          id="${id}" value="${valueCombined}" data-score="${opt.value}" ${isChecked}>
-    <label class="form-check-label flex-grow-1 border rounded p-3 mb-0" for="${id}">
-      ${opt.jawaban}
-    </label>
-  </div>
-`;
+        <div class="form-check mb-3 d-flex align-items-center">
+          <input class="form-check-input me-3" type="radio" name="currentQuestion"
+                id="${id}" value="${valueCombined}" data-score="${opt.value}" ${isChecked}>
+          <label class="form-check-label flex-grow-1 border rounded p-3 mb-0" for="${id}">
+            ${opt.jawaban}
+          </label>
+        </div>
+      `;
           })
           .join("");
 
         container.innerHTML = `
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-light">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="badge bg-primary">Pertanyaan ${
-              currentQuestionIndex + 1
-            }</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <h5 class="card-title mb-4">${item.soal}</h5>
-          <div data-kategori="${(
-            item.kategori || ""
-          ).toLowerCase()}">${opts}</div>
-        </div>
+  <div class="card shadow-sm border-0">
+    <div class="card-header" style="background-color:#066a4c;">
+      <div class="d-flex justify-content-between align-items-center w-100">
+        <span style="color: #ffe7bb; font-weight: bold;">Pertanyaan ${
+          currentQuestionIndex + 1
+        }</span>
       </div>
-    `;
+    </div>
+    <div class="card-body">
+      <h5 class="card-title mb-4 question-text">${item.soal}</h5>
+      <div data-kategori="${(item.kategori || "").toLowerCase()}">${opts}</div>
+    </div>
+  </div>
+`;
 
         container.querySelectorAll('input[type="radio"]').forEach((input) => {
           input.addEventListener("change", (e) => {
@@ -366,18 +405,18 @@
       async function init() {
         const container = document.getElementById("soalContainer");
         container.innerHTML = `
-      <div class="card shadow-sm">
-        <div class="card-body text-center">
-          <div class="placeholder-glow">
-            <span class="placeholder col-6 mb-3"></span>
-            <span class="placeholder col-8"></span>
-          </div>
-          <div class="spinner-border text-primary mt-3" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-    `;
+            <div class="card shadow-sm">
+              <div class="card-body text-center">
+                <div class="placeholder-glow">
+                  <span class="placeholder col-6 mb-3"></span>
+                  <span class="placeholder col-8"></span>
+                </div>
+                <div class="spinner-border text-primary mt-3" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+          `;
 
         let data = VAR_FALLBACK;
         if (!data) {
@@ -388,10 +427,10 @@
             data = shuffleArray(data);
           } catch (e) {
             container.innerHTML = `
-          <div class="alert alert-danger text-center">
-            <h5>⚠️ Gagal memuat data soal</h5>
-            <p class="mb-0">Pastikan <code>${API_URL}</code> dapat diakses.</p>
-          </div>`;
+                <div class="alert alert-danger text-center">
+                  <h5>⚠️ Gagal memuat data soal</h5>
+                  <p class="mb-0">Pastikan <code>${API_URL}</code> dapat diakses.</p>
+                </div>`;
             return;
           }
         }
