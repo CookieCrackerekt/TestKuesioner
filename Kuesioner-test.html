@@ -190,14 +190,14 @@
                 : "";
 
             return `
-        <div class="form-check mb-3">
-          <input class="form-check-input" type="radio" name="currentQuestion"
-                id="${id}" value="${valueCombined}" data-score="${opt.value}" ${isChecked}>
-          <label class="form-check-label d-block border rounded p-3" for="${id}">
-            ${opt.jawaban}
-          </label>
-        </div>
-      `;
+  <div class="form-check mb-3 d-flex align-items-center">
+    <input class="form-check-input me-3" type="radio" name="currentQuestion"
+          id="${id}" value="${valueCombined}" data-score="${opt.value}" ${isChecked}>
+    <label class="form-check-label flex-grow-1 border rounded p-3 mb-0" for="${id}">
+      ${opt.jawaban}
+    </label>
+  </div>
+`;
           })
           .join("");
 
