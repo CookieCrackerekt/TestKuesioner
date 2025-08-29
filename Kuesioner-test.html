@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bootstrap 5</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    input[type="radio"] {
+      accent-color: #0d6efd;
+      /* Bootstrap primary */
+    }
+
+    .progress-indicator {
+      height: 4px;
+      background-color: #e9ecef;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #0d6efd, #6610f2);
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+
+<body class="bg-light text-dark">
+  <main class="container py-4">
+    <!-- Progress Bar -->
+    <div id="progressContainer" class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <small class="text-muted">Progress</small>
+        <small class="text-muted" id="progressText">0/0</small>
+      </div>
+      <div class="progress-indicator">
+        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Soal Container -->
+    <div id="soalContainer" class="mb-4"></div>
+
+    <!-- Navigasi -->
+    <div id="navigationContainer" class="d-flex justify-content-between">
+      <button type="button" id="btnPrev" class="btn btn-outline-primary" disabled>
+        ← Sebelumnya
+      </button>
+      <div>
+        <button type="button" id="btnSkip" class="btn btn-outline-secondary me-2">
+          Selanjutnya →
+        </button>
+        <button type="button" id="btnSelesai" class="btn btn-success" style="display: none;">
+          Selesai
+        </button>
+      </div>
+    </div>
+
+    <!-- Reset Button -->
+    <div id="resetContainer" class="d-flex justify-content-center pt-4">
+      <button type="button" id="btnReset" class="btn btn-outline-secondary">
+        Reset Survey
+      </button>
+    </div>
+
+    <!-- Hasil Klasifikasi -->
+    <section id="hasilKlasifikasi" class="mt-5" style="display: none;">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4"
+              style="background: linear-gradient(135deg,#0d6efd,#6610f2) !important;">
+              <h3 class="mb-0">🎉 Hasil Survey Kesiapan Ekspor</h3>
+            </div>
+            <div class="card-body p-4">
+              <div class="text-center mb-4">
+                <h4 id="status" class="text-primary mb-2">—</h4>
+                <p id="statusDesc" class="text-muted mb-0">
+                  Terima kasih telah mengisi survey!
+                </p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <div class="bg-light rounded p-3">
+                    <div class="small text-muted">Total Kategori X</div>
+                    <div id="sumX" class="fs-4 fw-bold text-primary">0</div>
+                    <div class="progress mt-2" style="height: 6px;">
+                      <div id="barX" class="progress-bar bg-primary" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="bg-light rounded p-3">
+                    <div class="small text-muted">Total Kategori Y</div>
+                    <div id="sumY" class="fs-4 fw-bold text-info">0</div>
+                    <div class="progress mt-2" style="height: 6px;">
+                      <div id="barY" class="progress-bar bg-info" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <button type="button" id="btnMulaiUlang" class="btn btn-outline-primary">
+                  Mulai Survey Lagi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "https://arif.id/api/soal";
+    const VAR_FALLBACK = null;
+
+    let currentQuestionIndex = 0;
+    let allData = [];
+    let formAnswers = {};
+    let surveyFinished = false; // ✅ flag untuk tandai survey selesai
+
+    function updateProgress() {
+      const total = allData.length;
+      const answered = Object.keys(formAnswers).length;
+      const percentage = total > 0 ? (answered / total) * 100 : 0;
+
+      document.getElementById("progressText").textContent = `${answered}/${total} terjawab`;
+      document.getElementById("progressBar").style.width = `${percentage}%`;
+    }
+
+    function renderCurrentQuestion() {
+      if (currentQuestionIndex >= allData.length) {
+        showResults();
+        return;
+      }
+
+      const container = document.getElementById("soalContainer");
+      const item = allData[currentQuestionIndex];
+
+      const opts = item.pilihan_jawaban.map((opt, i) => {
+        const valueCombined = `${opt.value} | ${opt.jawaban}`;
+        const id = `q${currentQuestionIndex}_opt${i}`;
+        const isChecked = formAnswers[currentQuestionIndex] === valueCombined ? 'checked' : '';
+
+        return `
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="radio" name="currentQuestion"
+                id="${id}" value="${valueCombined}" data-score="${opt.value}" ${isChecked}>
+          <label class="form-check-label d-block border rounded p-3" for="${id}">
+            ${opt.jawaban}
+          </label>
+        </div>
+      `;
+      }).join("");
+
+      container.innerHTML = `
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary">Pertanyaan ${currentQuestionIndex + 1}</span>
+            <span class="small text-muted">${item.kategori}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title mb-4">${item.soal}</h5>
+          <div data-kategori="${(item.kategori || "").toLowerCase()}">${opts}</div>
+        </div>
+      </div>
+    `;
+
+      container.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener("change", (e) => {
+          formAnswers[currentQuestionIndex] = e.target.value;
+          calculateAndDisplay();
+          updateProgress();
+          updateNavigation();
+
+          setTimeout(() => {
+            if (currentQuestionIndex < allData.length - 1) {
+              currentQuestionIndex++;
+              renderCurrentQuestion();
+            } else {
+              updateNavigation();
+            }
+          }, 500);
+        });
+      });
+
+      updateNavigation();
+      updateProgress();
+    }
+
+    function updateNavigation() {
+      if (surveyFinished) return; // ✅ stop kalau sudah selesai
+
+      const btnPrev = document.getElementById("btnPrev");
+      const btnSkip = document.getElementById("btnSkip");
+      const btnSelesai = document.getElementById("btnSelesai");
+
+      btnPrev.disabled = currentQuestionIndex === 0;
+
+      if (currentQuestionIndex === allData.length - 1) {
+        btnSkip.style.display = "none";
+      } else {
+        btnSkip.style.display = "inline-block";
+      }
+
+      const totalQuestions = allData.length;
+      const answeredQuestions = Object.keys(formAnswers).length;
+      const allAnswered = answeredQuestions === totalQuestions;
+
+      if (currentQuestionIndex === allData.length - 1 && allAnswered) {
+        btnSelesai.style.display = "inline-block";
+        btnSelesai.disabled = false;
+      } else if (currentQuestionIndex === allData.length - 1) {
+        btnSelesai.style.display = "inline-block";
+        btnSelesai.disabled = true;
+        btnSelesai.textContent = `Selesai`;
+      } else {
+        btnSelesai.style.display = "none";
+        btnSelesai.disabled = false;
+        btnSelesai.textContent = "Selesai";
+      }
+    }
+
+    function showResults() {
+      surveyFinished = true; // ✅ tandai sudah selesai
+
+      document.getElementById("soalContainer").style.display = "none";
+      document.getElementById("progressContainer").style.display = "none";
+      document.getElementById("btnPrev").style.display = "none"
+      document.getElementById("btnSkip").style.display = "none";
+      document.getElementById("btnSelesai").style.display = "none"
+      document.getElementById("btnReset").style.display = "none"
+
+      document.getElementById("hasilKlasifikasi").style.display = "block";
+      
+
+      document.getElementById("hasilKlasifikasi").scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+
+    function resetSurvey() {
+      surveyFinished = false; // ✅ reset flag
+      formAnswers = {};
+      currentQuestionIndex = 0;
+
+      document.getElementById("soalContainer").style.display = "block";
+      document.getElementById("navigationContainer").style.display = "flex";
+      document.getElementById("progressContainer").style.display = "block";
+      document.getElementById("btnPrev").style.display = "block"
+      document.getElementById("btnSkip").style.display = "block";
+      document.getElementById("btnSelesai").style.display = "block"
+      document.getElementById("btnReset").style.display = "block"
+
+      document.getElementById("hasilKlasifikasi").style.display = "none";
+      renderCurrentQuestion();
+    }
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function calculateAndDisplay() {
+      let sumX = 0, sumY = 0;
+
+      for (const [questionIndex, answer] of Object.entries(formAnswers)) {
+        if (!answer) continue;
+        const idx = parseInt(questionIndex);
+        const item = allData[idx];
+        if (!item) continue;
+
+        const kategori = (item.kategori || "").toLowerCase();
+        const score = parseInt(answer.split("|")[0], 10) || 0;
+
+        if (kategori === "x") sumX += score;
+        else if (kategori === "y") sumY += score;
+      }
+
+      document.getElementById("sumX").textContent = sumX;
+      document.getElementById("sumY").textContent = sumY;
+
+      const maxX = 22, maxY = 49;
+      document.getElementById("barX").style.width = Math.min(100, (sumX / maxX) * 100) + "%";
+      document.getElementById("barY").style.width = Math.min(100, (sumY / maxY) * 100) + "%";
+
+      let status = "";
+      if (sumX < 15 && sumY < 25) status = "Ready to Start";
+      else if (sumX >= 15 && sumY < 25) status = "Potential Exportir";
+      else if (sumX < 15 && sumY >= 25) status = "Emerging Exportir";
+      else status = "Established Exportir";
+
+      document.getElementById("status").textContent = status;
+      const descMap = {
+        "Ready to Start": "Fondasi awal ada. Perkuat kapasitas & pemahaman ekspor.",
+        "Potential Exportir": "Potensi internal kuat. Perluas kesiapan pasar & strategi.",
+        "Emerging Exportir": "Kesiapan pasar bagus. Perkuat kapasitas internal.",
+        "Established Exportir": "Matang. Fokus scale-up & efisiensi.",
+      };
+      document.getElementById("statusDesc").textContent = descMap[status] || "";
+    }
+
+    async function init() {
+      const container = document.getElementById("soalContainer");
+      container.innerHTML = `
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <div class="placeholder-glow">
+            <span class="placeholder col-6 mb-3"></span>
+            <span class="placeholder col-8"></span>
+          </div>
+          <div class="spinner-border text-primary mt-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+      let data = VAR_FALLBACK;
+      if (!data) {
+        try {
+          const res = await fetch(API_URL, { cache: "no-store" });
+          if (!res.ok) throw new Error("Gagal memuat soal.json");
+          data = await res.json();
+          data = shuffleArray(data);
+        } catch (e) {
+          container.innerHTML = `
+          <div class="alert alert-danger text-center">
+            <h5>⚠️ Gagal memuat data soal</h5>
+            <p class="mb-0">Pastikan <code>${API_URL}</code> dapat diakses.</p>
+          </div>`;
+          return;
+        }
+      }
+
+      allData = data;
+      currentQuestionIndex = 0;
+      renderCurrentQuestion();
+    }
+
+    function attachNavigationListeners() {
+      document.getElementById("btnPrev").addEventListener("click", () => {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          renderCurrentQuestion();
+        }
+      });
+
+      document.getElementById("btnSkip").addEventListener("click", () => {
+        if (currentQuestionIndex < allData.length - 1) {
+          currentQuestionIndex++;
+          renderCurrentQuestion();
+        }
+      });
+
+      document.getElementById("btnSelesai").addEventListener("click", () => {
+        const totalQuestions = allData.length;
+        const answeredQuestions = Object.keys(formAnswers).length;
+
+        if (answeredQuestions === totalQuestions) {
+          showResults();
+          calculateAndDisplay();
+        } else {
+          alert(`Mohon jawab semua pertanyaan terlebih dahulu. (${answeredQuestions}/${totalQuestions} terjawab)`);
+        }
+      });
+
+      document.getElementById("btnReset").addEventListener("click", () => {
+        if (confirm("Apakah Anda yakin ingin mengulang survey dari awal?")) {
+          resetSurvey();
+        }
+      });
+    }
+
+    attachNavigationListeners();
+    document.getElementById("btnMulaiUlang").addEventListener("click", () => {
+      resetSurvey();
+    });
+
+    init();
+  </script>
+</body>
+
+</html>
