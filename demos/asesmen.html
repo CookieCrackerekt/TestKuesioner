@@ -12,7 +12,7 @@
   <meta name="author" content="">
   <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/template/favicon.svg">
   <link href="assets/css/style%EF%B9%96v=6.0.0.css" rel="stylesheet">
-  <title>SIP Kemendag - Kuesioner</title>
+  <title>SIP Kemendag - Asesmen</title>
   <style>
     input[type="radio"] {
       accent-color: #0d6efd;
@@ -57,25 +57,33 @@
     }
 
     #btnPrev,
-    #btnSkip {
+    #btnSkip,
+    #btnSelesai,
+    #btnLogin,
+    #btnMulaiUlang {
       background-color: #192a56;
       color: #ffe7bb;
       border: none;
-      /* biar ga ada border outline default */
       transition: all 0.3s ease;
-      /* buat animasi halus */
     }
 
     #btnPrev:hover,
-    #btnSkip:hover {
+    #btnSkip:hover,
+    #btnSelesai:hover,
+    #btnLogin:hover,
+    #btnMulaiUlang:hover {
       background-color: #066a4c;
-      color: #ffe7bb;
-      /* biar teks tetap kontras */
       transform: translateY(-3px);
-      /* naik dikit */
     }
 
-    /* Styling reset button tambahan */
+    #btnPrev:hover span,
+    #btnSkip:hover span,
+    #btnSelesai:hover span,
+    #btnLogin:hover #btnMulaiUlang:hover {
+      color: #ffe7bb;
+      transform: translateY(-3px);
+    }
+
     #btnReset {
       background: linear-gradient(45deg, #f2961a, #f9c700);
       color: #ffe7bb;
@@ -84,7 +92,12 @@
     }
 
     #btnReset:hover {
-      background: #6a0606;
+      background: #fb5e2e;
+      transform: translateY(-3px);
+      color: #ffe7bb;
+    }
+
+    #btnReset:hover span {
       transform: translateY(-3px);
       color: #ffe7bb;
     }
@@ -120,7 +133,8 @@
               <ul class="main-menu">
                 <li><a href="index.html">Beranda</a></li>
                 <li><a href="index.html">Informasi</a></li>
-                <li><a a class="active" href="Kuesioner.html">Kuesioner</a></li>
+                <li><a href="index.html">Kontak Kami</a></li>
+                <li><a a class="active" href="asesmen.html">Asesmen</a></li>
               </ul>
             </nav>
             <div class="burger-icon burger-icon-white"><span class="burger-icon-top"></span><span
@@ -159,7 +173,8 @@
                 </ul>
               </div>
             </div>
-            <div class="d-none d-sm-inline-block"><a class="btn btn-brand-1 hover-up" href="register.html">Masuk</a></div>
+            <div class="d-none d-sm-inline-block"><a class="btn btn-brand-1 hover-up" id="btnLogin"
+                href="register.html">Masuk</a></div>
           </div>
         </div>
       </div>
@@ -204,7 +219,8 @@
                   <ul class="mobile-menu font-heading">
                     <li><a href="index.html">Beranda</a></li>
                     <li><a href="index.html">Informasi</a></li>
-                    <li><a a class="active" href="Kuesioner.html">Kuesioner</a></li>
+                    <li><a href="index.html">Kontak Kami</a></li>
+                    <li><a a class="active" href="asesmen.html">Asesmen</a></li>
                   </ul>
                 </nav>
               </div>
@@ -315,7 +331,7 @@
           <!-- Tengah -->
           <div class="d-inline-block">
             <button type="button" id="btnReset" class="btn btn-brand-1 hover-up">
-              <span class="d-none d-sm-inline">Reset Survey</span>
+              <span class="d-none d-sm-inline">Reset Asesmen</span>
               <span class="d-inline d-sm-none">↻</span>
             </button>
           </div>
@@ -323,10 +339,9 @@
           <div class="d-inline-block">
             <button type="button" id="btnSkip" class="btn btn-brand-1 hover-up">
               <span class="d-none d-sm-inline">Selanjutnya →</span>
-              <span class="d-inline d-sm-none">→</span>
+              <span class="d-sm-none">→</span>
             </button>
             <button type="button" id="btnSelesai" class="btn btn-brand-1 hover-up" style="display: none">
-              Selesai
             </button>
           </div>
 
@@ -339,17 +354,17 @@
                 <div class="card-header bg-primary text-white text-center py-4" style="
                     background: linear-gradient(
                       135deg,
-                      #0d6efd,
-                      #6610f2
+                      #f2961a,
+                      #f9c700
                     ) !important;
                   ">
-                  <h3 class="mb-0">🎉 Hasil Survey Kesiapan Ekspor</h3>
+                  <h3 class="mb-0">🎉 Hasil Asesmen Kesiapan Ekspor</h3>
                 </div>
                 <div class="card-body p-4">
                   <div class="text-center mb-4">
                     <h4 id="status" class="text-primary mb-2">—</h4>
                     <p id="statusDesc" class="text-muted mb-0">
-                      Terima kasih telah mengisi survey!
+                      Terima kasih telah mengisi Asesmen!
                     </p>
                   </div>
                   <div class="row g-3 mb-4">
@@ -374,7 +389,7 @@
                   </div>
                   <div class="text-center">
                     <button type="button" id="btnMulaiUlang" class="btn btn-brand-1 hover-up">
-                      Mulai Survey Lagi
+                      Mulai Asesmen Lagi
                     </button>
                   </div>
                 </div>
@@ -392,8 +407,9 @@
         <div class="row">
           <div class="col-lg-3 width-20">
             <div class="mb-10"><img src="assets/imgs/template/logo-sip.svg" alt="iori"></div>
-            <p class="font-md mb-20 color-grey-400">4517 Washington Ave.<br class="d-none d-lg-block">Manchester,
-              Kentucky 39495</p>
+            <p class="font-md mb-20 color-grey-400">Jl. M. I. Ridwan Rais, No. 5 .<br class="d-none d-lg-block">Daerah
+              Khusus Ibukota
+              Jakarta 10110, Indonesia</p>
             <div class="font-md mb-20 color-grey-400"><strong class="font-md-bold">Hours:</strong> 8:00 - 17:00, Mon -
               Sat</div>
             <h6 class="color-brand-1">Follow Us</h6>
@@ -458,8 +474,9 @@
                 <li><a class="font-sm color-grey-300" href="term-conditions.html">Terms of service</a></li>
               </ul>
             </div>
-            <div class="col-lg-6 col-md-12 text-center text-lg-end"><span class="color-grey-300 font-md">©Iori Official
-                2025. All right reversed.</span></div>
+            <div class="col-lg-6 col-md-12 text-center text-lg-end"><span class="color-grey-300 font-md">©2025 Pusat
+                Data dan Sistem Informasi
+                Kemendag. All right reversed.</span></div>
           </div>
         </div>
       </div>
