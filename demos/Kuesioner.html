@@ -52,7 +52,7 @@
       padding-top: 1rem;
       padding-bottom: 1rem;
       background: none;
-      position: flex;
+      position: sticky;
       bottom: 0;
     }
 
@@ -478,7 +478,7 @@
 
   <main class="main">
     <section class="section">
-      <div class="container">
+      <div class="container py-4">
         <!-- Progress Bar -->
         <div id="progressContainer" class="mb-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -494,21 +494,24 @@
         <!-- Navigasi -->
         <div id="navigationContainer" class="d-flex justify-content-between align-items-center">
           <!-- Kiri -->
-          <div class="d-none d-sm-inline-block"> 
-            <button type="button" id="btnPrev" class="btn btn-brand-1 hover-up" disabled> 
-              ← Sebelumnya 
+          <div class="d-inline-block">
+            <button type="button" id="btnPrev" class="btn btn-brand-1 hover-up" disabled>
+              <span class="d-none d-sm-inline">← Sebelumnya</span>
+              <span class="d-inline d-sm-none">←</span>
             </button>
           </div>
           <!-- Tengah -->
-          <div class="d-none d-sm-inline-block">
+          <div class="d-inline-block">
             <button type="button" id="btnReset" class="btn btn-brand-1 hover-up">
-              Reset Survey
+              <span class="d-none d-sm-inline">Reset Survey</span>
+              <span class="d-inline d-sm-none">↻</span>
             </button>
           </div>
           <!-- Kanan -->
-          <div class="d-none d-sm-inline-block">
+          <div class="d-inline-block">
             <button type="button" id="btnSkip" class="btn btn-brand-1 hover-up">
-              Selanjutnya →
+              <span class="d-none d-sm-inline">Selanjutnya →</span>
+              <span class="d-inline d-sm-none">→</span>
             </button>
             <button type="button" id="btnSelesai" class="btn btn-brand-1 hover-up" style="display: none">
               Selesai
